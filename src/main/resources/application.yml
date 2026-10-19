@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: studyhub
+
+  # ===== 数据源（密码走环境变量，禁止明文进仓库）=====
+  datasource:
+    url: jdbc:mysql://localhost:3306/studyhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: root
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ===== Redis（本地无密码时留空）=====
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+
+server:
+  port: 8080
+
+# ===== MyBatis-Plus =====
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# ===== Knife4j =====
+knife4j:
+  enable: true
+
+# ===== 日志（traceId 贯穿）=====
+logging:
+  level:
+    com.studyhub: debug
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+
+# ===== 认证开关（开发期 false：放行所有请求，测试不用 token）=====
+app:
+  auth:
+    enabled: false
+
+# ===== JWT =====
+jwt:
+  # ⚠️ 生产必须通过环境变量 JWT_SECRET 注入，禁止提交真实密钥（长度 >= 32 字符）
+  secret: ${JWT_SECRET:studyhub-dev-secret-key-please-change-me-32chars}
+  access-expiration: 1800000     # 30 分钟（毫秒）
+  refresh-expiration: 604800000  # 7 天（毫秒）
