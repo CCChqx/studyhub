@@ -34,6 +34,7 @@ CREATE TABLE `subject` (
     `description` VARCHAR(255) DEFAULT NULL COMMENT '描述',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted`     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除：0正常 1已删除',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_code` (`code`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '学科表';
@@ -49,6 +50,7 @@ CREATE TABLE `category` (
     `sort`        INT         NOT NULL DEFAULT 0 COMMENT '排序值，越小越靠前',
     `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted`     TINYINT     NOT NULL DEFAULT 0 COMMENT '逻辑删除：0正常 1已删除',
     PRIMARY KEY (`id`),
     KEY `idx_subject` (`subject_id`),
     KEY `idx_parent` (`parent_id`)
@@ -68,13 +70,37 @@ CREATE TABLE `knowledge_point` (
     `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态：1启用 0停用（内容侧；是否掌握见 review_state.mastered）',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted`     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除：0正常 1已删除',
     PRIMARY KEY (`id`),
     KEY `idx_category` (`category_id`),
     KEY `idx_subject` (`subject_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '知识点表';
 
 -- =============================================
--- 5. 复习状态表（当前状态快照，可更新，乐观锁防并发）
+-- 5. 题目表（单选 + 多选 + 简答；kp_id 可空，题目可只挂分类不挂知识点）
+-- =============================================
+CREATE TABLE `question` (
+    `id`          BIGINT   NOT NULL AUTO_INCREMENT,
+    `subject_id`  BIGINT   NOT NULL COMMENT '所属学科',
+    `category_id` BIGINT   NOT NULL COMMENT '所属分类',
+    `kp_id`       BIGINT   DEFAULT NULL COMMENT '所属知识点，可空',
+    `type`        TINYINT  NOT NULL COMMENT '题目类型：1单选 2多选 3简答',
+    `stem`        TEXT     NOT NULL COMMENT '题干',
+    `options`     TEXT     DEFAULT NULL COMMENT '选择题选项，JSON 数组如 ["A.xx","B.xx"]；简答题为空',
+    `answer`      TEXT     NOT NULL COMMENT '答案：选择题存选项字母如 A，简答题存参考答案文本',
+    `analysis`    TEXT     DEFAULT NULL COMMENT '解析',
+    `status`      TINYINT  NOT NULL DEFAULT 1 COMMENT '状态：1启用 0停用',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted`     TINYINT  NOT NULL DEFAULT 0 COMMENT '逻辑删除：0正常 1已删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_subject` (`subject_id`),
+    KEY `idx_category` (`category_id`),
+    KEY `idx_kp` (`kp_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '题目表';
+
+-- =============================================
+-- 6. 复习状态表（当前状态快照，可更新，乐观锁防并发）
 -- =============================================
 CREATE TABLE `review_state` (
     `id`                 BIGINT        NOT NULL AUTO_INCREMENT,
@@ -96,7 +122,7 @@ CREATE TABLE `review_state` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '复习状态表';
 
 -- =============================================
--- 6. 复习日志表（append-only 事实源，只追加，支撑事件溯源/算法回放）
+-- 7. 复习日志表（append-only 事实源，只追加，支撑事件溯源/算法回放）
 -- =============================================
 CREATE TABLE `review_log` (
     `id`                     BIGINT        NOT NULL AUTO_INCREMENT,
@@ -118,7 +144,7 @@ CREATE TABLE `review_log` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '复习日志表(事实源)';
 
 -- =============================================
--- 7. 学习统计日归档表（Redis 热数据定时归档，唯一索引防重复）
+-- 8. 学习统计日归档表（Redis 热数据定时归档，唯一索引防重复）
 -- =============================================
 CREATE TABLE `study_record` (
     `id`             BIGINT   NOT NULL AUTO_INCREMENT,

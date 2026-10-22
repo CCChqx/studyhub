@@ -15,7 +15,11 @@ public enum ErrorCode {
     NOT_FOUND(404, "资源不存在"),
     CONFLICT(409, "资源已存在"),
     TOO_MANY_REQUESTS(429, "请勿重复提交"),
-    SYSTEM_ERROR(500, "系统繁忙，请稍后重试");
+    SYSTEM_ERROR(500, "系统繁忙，请稍后重试"),
+    SUBJECT_HAS_CONTENT(4091,"学科下有分类,不能删除"),
+    CATEGORY_HAS_CHILDREN(4092,"分类下还有子分类,不能删除"),
+    CATEGORY_HAS_CONTENT(4093,"分类下还有知识点或题目,不能删除"),
+    KNOWLEDGE_POINT_HAS_QUESTION(4094,"知识点下还有题目,不能删除");
 
     private final Integer code;
     private final String message;
