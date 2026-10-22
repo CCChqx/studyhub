@@ -19,7 +19,10 @@ public enum ErrorCode {
     SUBJECT_HAS_CONTENT(4091,"学科下有分类,不能删除"),
     CATEGORY_HAS_CHILDREN(4092,"分类下还有子分类,不能删除"),
     CATEGORY_HAS_CONTENT(4093,"分类下还有知识点或题目,不能删除"),
-    KNOWLEDGE_POINT_HAS_QUESTION(4094,"知识点下还有题目,不能删除");
+    KNOWLEDGE_POINT_HAS_QUESTION(4094,"知识点下还有题目,不能删除"),
+    USERNAME_EXISTS(4090,"用户名已存在"),
+    LOGIN_FAILED(4010,"用户名或密码错误"),
+    USER_DISABLED(4030,"账号已被冻结");
 
     private final Integer code;
     private final String message;
