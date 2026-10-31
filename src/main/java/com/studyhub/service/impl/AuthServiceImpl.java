@@ -32,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${jwt.access-expiration}")
     private long accessExpiration;
 
+    //  用户注册接口
     @Override
     public UserVO register(RegisterDTO dto) {
 
@@ -45,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
         // 注册
         User user = new User();
         String hashPassword = passwordEncoder.encode(dto.getPassword());
-        user.setUsername(dto.getUsername());
+        user.setUsername(username);
         user.setNickname(dto.getNickname());
         user.setPasswordHash(hashPassword);
         user.setStatus(1);
@@ -60,11 +61,14 @@ public class AuthServiceImpl implements AuthService {
         return UserConverter.toVO(user);
     }
 
+    // 用户登录接口
     @Override
     public LoginVO login(LoginDTO dto) {
 
+        String username = dto.getUsername().trim().toLowerCase(Locale.ROOT);
+
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getUsername, dto.getUsername()));
+                .eq(User::getUsername, username));
 
         if (user == null) {
             throw new BusinessException(ErrorCode.LOGIN_FAILED);
