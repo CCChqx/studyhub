@@ -1,7 +1,5 @@
 package com.studyhub.review;
 
-import lombok.Data;
-
 import java.time.LocalDate;
 
 /*

@@ -1,7 +1,5 @@
 package com.studyhub.review;
 
-import lombok.Data;
-
 /*
 *   输入：旧状态
 * */
